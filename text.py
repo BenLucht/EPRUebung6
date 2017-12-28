@@ -29,7 +29,7 @@ class text():
 
         self.word_count = self.count_words(self.content)
         self.keystroke_count = self.count_keystrokes(self.content)
-        self.character_count = self.count_characters()
+        self.character_count = self.count_characters(self.content)
         self.character_distribution = self.distribution_characters()
         self.word_distribution = self.distribution_words()
         self.average_word_length = self.average_words()
@@ -61,8 +61,13 @@ class text():
 
         return len(chars.findall(content)) # + len(caps.findall(content))
 
-    def count_characters(self):
-        pass
+    def count_characters(self, content):
+        """Counts all characters excl. spaces."""
+
+        #everything but whitespace of any kind
+        chars = re.compile(r'\S')
+
+        return len(chars.findall(content))
 
     def distribution_characters(self):
         pass
