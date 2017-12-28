@@ -1,3 +1,6 @@
+import string
+import itertools
+
 class text():
     def __init__(self, path):
         """
