@@ -1,5 +1,6 @@
 import string
 import itertools
+import re
 
 class text():
     def __init__(self, path):
@@ -26,15 +27,27 @@ class text():
             except:
                 pass
 
-        self.word_count = self.count_words()
+        self.word_count = self.count_words(self.content)
         self.keystroke_count = self.count_keystrokes()
         self.character_count = self.count_characters()
         self.character_distribution = self.distribution_characters()
         self.word_distribution = self.distribution_words()
         self.average_word_length = self.average_words()
 
-    def count_words(self):
-        pass
+    def count_words(self, content):
+        """Counts the words in the given text, excluding 'apostrophed' abbreviations."""
+
+        #standard punctuation plus extra characters
+        punctuation = string.punctuation + '´’'
+        #translation table for removing punctuation from the text
+        trans_table = str.maketrans(dict(zip(punctuation, ['' for ch in punctuation])))
+        #regex to find all words (1+ characters) in the text
+        words = re.compile(r'\b\w+\b')
+
+        #remove puntuation from text
+        content = content.translate(trans_table)
+
+        return len(words.findall(content))
 
     def count_keystrokes(self):
         pass
