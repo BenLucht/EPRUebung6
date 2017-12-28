@@ -28,7 +28,7 @@ class text():
                 pass
 
         self.word_count = self.count_words(self.content)
-        self.keystroke_count = self.count_keystrokes()
+        self.keystroke_count = self.count_keystrokes(self.content)
         self.character_count = self.count_characters()
         self.character_distribution = self.distribution_characters()
         self.word_distribution = self.distribution_words()
@@ -49,8 +49,17 @@ class text():
 
         return len(words.findall(content))
 
-    def count_keystrokes(self):
-        pass
+    def count_keystrokes(self, content):
+        """
+        Counts the simple amount of keystrokes
+        (does not account for shift+char to make capital letters)
+        """
+        chars = re.compile(r'(\w|\W)')
+
+        #add double count for capitals
+        #caps = re.compile(r'[A-Z]')
+
+        return len(chars.findall(content)) # + len(caps.findall(content))
 
     def count_characters(self):
         pass
