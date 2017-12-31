@@ -1,3 +1,12 @@
+"""
+Text module, implements a text clas for storing text and statistics on the text.
+"""
+
+__author__ = "xxxxxxx: Ben, xxxxxxx: Anne"
+__copyright__ = "Copyright 2017/2018 – EPR-Goethe-Uni"
+__credits__ = "We would like to thank our coffee for the morning motivation."
+__email__ = "xxxxxxxx@stud.uni-frankfurt.de, xxxxxxxx@stud.uni-frankfurt.de"
+
 import string
 import itertools
 import re
@@ -77,3 +86,7 @@ class text():
 
     def average_words(self):
         pass
+
+
+if __name__ == '__main__':
+    pass
