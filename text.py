@@ -10,6 +10,7 @@ __email__ = "xxxxxxxx@stud.uni-frankfurt.de, xxxxxxxx@stud.uni-frankfurt.de"
 import string
 import itertools
 import re
+import json
 
 class text():
     def __init__(self, path):
@@ -79,14 +80,40 @@ class text():
         return len(chars.findall(content))
 
     def distribution_characters(self):
-        pass
+        return None
 
     def distribution_words(self):
-        pass
+        return None
 
     def average_words(self):
-        pass
+        return None
 
+    def save_json(self, file_name):
+        output = {
+            "content": self.content,
+            "word_count": self.word_count,
+            "keystroke_count": self.keystroke_count,
+            "character_count": self.character_count,
+            "character_distribution": self.character_distribution,
+            "word_distribution": self.word_distribution,
+            "average_word_length": self.average_word_length
+        }
+
+        try:
+            if '.' in file_name:
+                if '.txt'in file_name or '.json' in file_name:
+                    pass
+                else:
+                    raise ValueError('file_name problem: file name must be .txt, ' + \
+                                     '.json or neither (will then be saved as .json)')
+            else:
+                file_name = file_name + '.json'
+
+            with open(file_name, 'w') as file:
+                json.dump(output, file)
+
+        except ValueError as e:
+            print('ValueError:', e)
 
 if __name__ == '__main__':
     pass
