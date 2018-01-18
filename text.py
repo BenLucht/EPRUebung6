@@ -79,11 +79,30 @@ class text():
 
         return len(chars.findall(content))
 
-    def distribution_characters(self):
-        return None
+    def distribution_characters(self, print_result=False):
+        test = [(item, self.content.count(item)*1.0/self.keystroke_count) \
+                for item in set(self.content)]
+
+        return sorted(test, key=lambda t: t[1])[::-1]
 
     def distribution_words(self):
         return None
+
+    def print_distribution(self):
+        output = ''
+        for item in self.character_distribution:
+            if item[0] == '\n':
+                character = r'\n'
+            elif item[0] == '\t':
+                character == r'\t'
+            elif item[0] == ' ':
+                character = '" "'
+            else:
+                character = item[0]
+
+            output += '{:^5}| {:6.2f}% \n'.format(character, item[1]*100)
+
+        print(output)
 
     def average_words(self):
         return None
