@@ -39,15 +39,15 @@ class text():
             except:
                 pass
 
-        self.word_count = self.count_words(self.content)
+        self.word_count = self.count_words()
         self.keystroke_count = self.count_keystrokes(self.content)
         self.character_count = self.count_characters(self.content)
         self.character_distribution = self.distribution_characters()
         self.word_distribution = self.distribution_words()
         self.average_word_length = self.average_words()
 
-    def count_words(self, content):
-        """Counts the words in the given text, excluding 'apostrophed' abbreviations."""
+    def list_of_words(self):
+        """Lists all the words in a text, excluding 'apostrophed' abbreviations."""
 
         #standard punctuation plus extra characters
         punctuation = string.punctuation + '´’'
@@ -57,9 +57,14 @@ class text():
         words = re.compile(r'\b\w+\b')
 
         #remove puntuation from text
-        content = content.translate(trans_table)
+        content = self.content.translate(trans_table)
 
-        return len(words.findall(content))
+        return [word.lower() for word in words.findall(content)]
+
+    def count_words(self):
+        """Counts the words in the given text, excluding 'apostrophed' abbreviations."""
+
+        return len(self.list_of_words())
 
     def count_keystrokes(self, content):
         """
@@ -82,17 +87,43 @@ class text():
         return len(chars.findall(content))
 
     def distribution_characters(self, print_result=False):
-        test = [(item, self.content.count(item)) \
+        """Calculates the frequency distribution of characters."""
+
+        #list of tuples (char, freq)
+        temp = [(item, self.content.count(item)) \
                 for item in set(self.content)]
 
-        return sorted(test, key=lambda t: t[1])[::-1]
+        #sorts the list of tuples by frequency
+        result = sorted(temp, key=lambda t: t[1])[::-1]
 
-    def distribution_words(self):
-        return None
+        if print_result:
+            self.print_distribution(type_to_print=result)
+        else:
+            return result
 
-    def print_distribution(self, percentage=False):
+    def distribution_words(self, print_result=False):
+        """Calculates the frequency distribution of words."""
+
+        #list of tuples (word, freq)
+        temp = [(item, self.list_of_words().count(item)) \
+                for item in set(self.list_of_words())]
+
+        #sorts the list of tuples by frequency
+        result =  sorted(temp, key=lambda t: t[1])[::-1]
+
+        if print_result:
+            self.print_distribution(type_to_print=result)
+        else:
+            return result
+
+    def print_distribution(self, type_to_print, percentage=False):
+        """
+        Prints the distribution for either characters or words
+        in descending order of frequency, either as total or percentage.
+        """
         output = ''
-        for item in self.character_distribution:
+        for item in type_to_print:
+            #replaces characters so they can be printed nicely
             if item[0] == '\n':
                 character = r'\n'
             elif item[0] == '\t':
@@ -103,14 +134,16 @@ class text():
                 character = item[0]
 
             if percentage:
-                output += '{:^9}| {:6.2f}%\n'.format(character, item[1]*1.0/self.keystroke_count*100)
+                output += '{:^21}| {:6.2f}%\n'.format(character, item[1]*1.0/self.keystroke_count*100)
             else:
-                output += '{:^9}| {}\n'.format(character, item[1])
+                output += '{:^21}| {}\n'.format(character, item[1])
 
         print(output)
 
     def average_words(self):
-        return None
+        """Calcualtes the average word length."""
+        return sum([len(word) for word in self.list_of_words()]) / \
+                     len(self.list_of_words())
 
     def save_json(self, file_name):
         output = {
@@ -145,8 +178,8 @@ class text():
         print("keystroke_count:", self.keystroke_count)
         print("character_count:", self.character_count)
         print("character_distribution: {}..".format(self.character_distribution[0]))
-        print("word_distribution:", self.word_distribution)
-        print("average_word_length:", self.average_word_length)
+        print("word_distribution: {}..".format(self.word_distribution[0]))
+        print("average_word_length: {:6.2f}".format(self.average_word_length))
 
 class commandline_interface():
     """Class to handle a command line interface for the text class."""
