@@ -11,6 +11,8 @@ import string
 import itertools
 import re
 import json
+import os
+import time
 
 class text():
     def __init__(self, path):
@@ -80,7 +82,7 @@ class text():
         return len(chars.findall(content))
 
     def distribution_characters(self, print_result=False):
-        test = [(item, self.content.count(item)*1.0/self.keystroke_count) \
+        test = [(item, self.content.count(item)) \
                 for item in set(self.content)]
 
         return sorted(test, key=lambda t: t[1])[::-1]
@@ -88,7 +90,7 @@ class text():
     def distribution_words(self):
         return None
 
-    def print_distribution(self):
+    def print_distribution(self, percentage=False):
         output = ''
         for item in self.character_distribution:
             if item[0] == '\n':
@@ -96,11 +98,14 @@ class text():
             elif item[0] == '\t':
                 character == r'\t'
             elif item[0] == ' ':
-                character = '" "'
+                character = '<space>'
             else:
                 character = item[0]
 
-            output += '{:^5}| {:6.2f}% \n'.format(character, item[1]*100)
+            if percentage:
+                output += '{:^9}| {:6.2f}%\n'.format(character, item[1]*1.0/self.keystroke_count*100)
+            else:
+                output += '{:^9}| {}\n'.format(character, item[1])
 
         print(output)
 
@@ -133,6 +138,176 @@ class text():
 
         except ValueError as e:
             print('ValueError:', e)
+
+    def show_stats(self):
+        print("content: {:20} ...".format(self.content))
+        print("word_count:", self.word_count)
+        print("keystroke_count:", self.keystroke_count)
+        print("character_count:", self.character_count)
+        print("character_distribution: {}..".format(self.character_distribution[0]))
+        print("word_distribution:", self.word_distribution)
+        print("average_word_length:", self.average_word_length)
+
+class commandline_interface():
+    """Class to handle a command line interface for the text class."""
+
+    def __init__(self):
+        """Initializes by calling the main command line dialog."""
+        self.textfile = None
+
+        self.dialog()
+
+    def cls(self):
+        """Clears the command line to avoid clutter."""
+        os.system('cls' if os.name=='nt' else 'clear')
+
+    def dialog(self):
+        """Main command line dialog."""
+        self.cls()
+        print('---------------------------------------------------------')
+        print('Enter "open" to ggo to open file dialog\n' + \
+              'Enter "save" to go to save file dialog\n' + \
+              'Enter "exit" to exit')
+        print('---------------------------------------------------------')
+
+        action = input()
+
+        #choice of action depending on user input
+        if action == 'open':
+            self.open_file(os.getcwd())
+        elif action == 'exit':
+            #exits the program
+            os._exit(0)
+        elif action == 'save':
+            #uses text method to save file isf a file was loaded
+            if self.textfile is not None:
+                self.save_file(os.getcwd())
+            else:
+                print('Please load a file first! (wait a sec)')
+                time.sleep(2)
+                self.dialog()
+
+    def ls(self, directory):
+        """Implements a convenient view of the current directory."""
+
+        #list of directories in the current directory
+        subfolders = [f.name for f in os.scandir(directory) if f.is_dir()]
+        #list of files in the current directory
+        subfiles = [f.name for f in os.scandir(directory) if f.is_file()]
+
+        #loop through both lists to print folder contents
+        print('{:20} {:20} \n'.format('Folders', 'Files'))
+        for folder, file in list(itertools.zip_longest(subfolders, subfiles)):
+            if folder is None:
+                folder = ''
+            elif file is None:
+                file = ''
+
+            print('{:20} {:20}'.format(folder, file))
+
+        return (subfolders, subfiles)
+
+    def open_file(self, original_directory):
+        """Open file dialog similar to tkinter."""
+        current_directory = original_directory
+
+        while True:
+            self.cls()
+            print('---------------------------------------------------------')
+            print('Enter "up" to get to parent directory\n' + \
+                  'Enter <folder name> to go to that directory\n' + \
+                  'Enter "backhome" to return to origin directory\n' + \
+                  'Enter "root" to go to highest level directory possible\n' + \
+                  'Enter "open: " + file name to load a file\n' + \
+                  'Enter "exit" to exit file open dialog\n')
+
+            path = current_directory
+            print('You are currently at ' + path + '\n')
+
+            subfolders, subfiles = self.ls(path)
+            print('---------------------------------------------------------')
+
+            action = input('Please enter your command:')
+
+            #choice of action depending on user input
+            if action in subfolders:
+                #changes current directory to the selected one
+                os.chdir(action)
+            elif action == 'up':
+                #changes to parent directory
+                os.chdir('..')
+            elif action[:5] == 'open:':
+                #loads text file from path and shows stats
+                print('Opening file: ' + path + '/' + action[6:])
+                self.textfile = text(path + '/' + action[6:])
+                self.textfile.show_stats()
+                input('Press <Enter> to go back to main dialog.')
+                self.dialog()
+                break
+            elif action == 'exit':
+                #back to main dialog
+                self.dialog()
+            elif action == 'backhome':
+                #back to the original directory
+                os.chdir(original_directory)
+            elif action == 'root':
+                #goes to the file system root
+                temp = original_directory.split('/')
+                os.chdir(temp[0] + '/')
+
+            current_directory = os.getcwd()
+
+        #change working directory back to where one started
+        os.chdir(original_directory)
+
+    def save_file(self, original_directory):
+        """Save file dialog similar to tkinter."""
+        current_directory = original_directory
+
+        while True:
+            self.cls()
+            print('---------------------------------------------------------')
+            print('Enter "up" to get to parent directory\n' + \
+                  'Enter <folder name> to go to that directory\n' + \
+                  'Enter "backhome" to return to origin directory\n' + \
+                  'Enter "root" to go to highest level directory possible\n' + \
+                  'Enter "save:" + file name to load a file\n' + \
+                  'Enter "exit" to exit file save dialog\n')
+
+            path = current_directory
+            print('You are currently at ' + path + '\n')
+
+            subfolders, subfiles = self.ls(path)
+            print('---------------------------------------------------------')
+
+            action = input('Please enter your command:')
+
+            if action in subfolders:
+                #changes current directory to the selected one
+                os.chdir(action)
+            elif action == 'up':
+                #changes to parent directory
+                os.chdir('..')
+            elif action[:5] == 'save:':
+                #uses text class save_json method to save file
+                print('Saving file to: ' + path + '/' + action[6:])
+                self.textfile.save_json(path + '/' + action[6:])
+                self.dialog()
+                break
+            elif action == 'exit':
+                #back to main dialog
+                self.dialog()
+            elif action == 'backhome':
+                #back to the original directory
+                os.chdir(original_directory)
+            elif action == 'root':
+                #goes to the file system root
+                temp = original_directory.split('/')
+                os.chdir(temp[0] + '/')
+
+            current_directory = os.getcwd()
+
+        os.chdir(original_directory)
 
 if __name__ == '__main__':
     pass
